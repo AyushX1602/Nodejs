@@ -1,10 +1,33 @@
 const express = require('express');
 const jwt= require('jsonwebtoken');
+const path = require('path');
 const JWT_Secret="Hutejkichut"
 const app = express();
 app.use(express.json());
 
+// Add CORS middleware
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, token');
+    
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+        res.sendStatus(200);
+    } else {
+        next();
+    }
+});
+
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
 const users =[];
+
+// Serve the main HTML file at root
+app.get('/', function(req, res) {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // function generate_token(){
 //     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -74,7 +97,12 @@ app.post('/signin', function(req,res){
 });
 
 
-app.post("/me", function(req, res){
+app.get('/me.html', function(req, res) {
+    res.sendFile(path.join(__dirname, 'public', 'me.html'));
+});
+
+
+app.get("/me", function(req, res){
 
     const token = req.headers.token;
     
@@ -122,4 +150,7 @@ app.post("/me", function(req, res){
     }
 });
 
-app.listen(3000);
+    app.listen(3000, () => {
+    console.log('Auth server running on port 3000');
+    console.log('Open http://localhost:3000 in your browser');
+});
